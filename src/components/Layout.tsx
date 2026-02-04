@@ -25,7 +25,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -62,9 +61,6 @@ function SidebarNav() {
   const navigate = useNavigate()
   const { pools, projects, removePool, addPoolToProject } = useCandidatePools()
   
-  // Check if any candidates route is active (for keeping collapsible open)
-  const hasCandidatesRouteActive = location.pathname.startsWith('/candidates')
-
   return (
     <SidebarContent className="pt-4">
       <SidebarGroup>
@@ -87,7 +83,7 @@ function SidebarNav() {
             })}
 
             {/* Candidates with nested items - under Analytics */}
-            <Collapsible asChild defaultOpen={hasCandidatesRouteActive} className="group/collapsible">
+            <Collapsible asChild defaultOpen={true} className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton tooltip="Candidates" isActive={false}>
@@ -159,10 +155,42 @@ function SidebarNav() {
                               <CollapsibleContent>
                                 <SidebarMenuSub>
                                   {project.children.map((child) => (
-                                    <SidebarMenuSubItem key={child.id}>
-                                      <SidebarMenuSubButton>
+                                    <SidebarMenuSubItem key={child.id} className="group/child-item relative">
+                                      <SidebarMenuSubButton className="pr-8">
                                         <span className="truncate">{child.name}</span>
                                       </SidebarMenuSubButton>
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <button className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded-md opacity-0 group-hover/child-item:opacity-100 hover:bg-sidebar-accent data-[state=open]:opacity-100">
+                                            <MoreHorizontal className="w-4 h-4" />
+                                          </button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent side="right" align="start" className="w-48">
+                                          <DropdownMenuSub>
+                                            <DropdownMenuSubTrigger>
+                                              <FolderPlus className="w-4 h-4 mr-2" />
+                                              Move to project
+                                            </DropdownMenuSubTrigger>
+                                            <DropdownMenuSubContent>
+                                              {projects.map((proj) => (
+                                                <DropdownMenuItem key={proj.id}>
+                                                  <Folder className="w-4 h-4 mr-2" />
+                                                  {proj.name}
+                                                </DropdownMenuItem>
+                                              ))}
+                                            </DropdownMenuSubContent>
+                                          </DropdownMenuSub>
+                                          <DropdownMenuItem>
+                                            <X className="w-4 h-4 mr-2" />
+                                            Remove from project
+                                          </DropdownMenuItem>
+                                          <DropdownMenuSeparator />
+                                          <DropdownMenuItem className="text-destructive">
+                                            <Trash2 className="w-4 h-4 mr-2" />
+                                            Delete
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
                                     </SidebarMenuSubItem>
                                   ))}
                                 </SidebarMenuSub>
@@ -197,18 +225,19 @@ function SidebarNav() {
                         const isActive = pool.id === currentPoolId || pool.query === currentQuery
                         
                         return (
-                        <SidebarMenuSubItem key={pool.id}>
+                        <SidebarMenuSubItem key={pool.id} className="group/pool-item relative">
                           <SidebarMenuSubButton 
                             isActive={isActive}
                             onClick={() => navigate(`/candidates/search?q=${encodeURIComponent(pool.query)}&poolId=${pool.id}`)}
+                            className="pr-8"
                           >
                             <span className="truncate">{pool.title}</span>
                           </SidebarMenuSubButton>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <SidebarMenuAction showOnHover>
+                              <button className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded-md opacity-0 group-hover/pool-item:opacity-100 hover:bg-sidebar-accent data-[state=open]:opacity-100">
                                 <MoreHorizontal className="w-4 h-4" />
-                              </SidebarMenuAction>
+                              </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent side="right" align="start" className="w-48">
                               <DropdownMenuSub>
