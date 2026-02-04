@@ -17,7 +17,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Overview />,
+        element: <Candidates />,
       },
       {
         path: '/jobs',
