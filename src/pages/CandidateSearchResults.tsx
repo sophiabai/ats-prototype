@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router'
-import { ArrowLeft, MoreVertical, Mail, ArrowRight, Filter, Maximize2, Search, ChevronDown, Plus, AtSign, Users, ArrowLeftToLine, ArrowRightToLine, ArrowRightFromLine, Table as TableIcon } from 'lucide-react'
+import { ArrowLeft, MoreVertical, Mail, ArrowRight, Filter, Maximize2, Search, ChevronDown, Plus, AtSign, Users, ArrowLeftToLine, ArrowRightFromLine, Table as TableIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -8,7 +8,6 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Card } from '@/components/ui/card'
 import {
   Table,
   TableBody,
@@ -30,7 +29,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { searchCandidates } from '@/lib/candidateSearch'
-import type { CandidateEvaluation, SearchCriterion, SearchResult } from '@/lib/candidateSearch'
+import type { CandidateEvaluation, SearchCriterion } from '@/lib/candidateSearch'
 import { useCandidatePools } from '@/lib/candidatePoolsContext'
 import type { Candidate } from '@/data/candidates'
 import { CandidateProfilePanel } from '@/components/CandidateProfilePanel'
@@ -592,7 +591,7 @@ export function CandidateSearchResults() {
                 </TableHeader>
                 <TableBody>
                   {filteredResults.map((evaluation) => {
-                    const { candidate, metCount, totalCriteria, criteriaResults } = evaluation
+                    const { candidate, metCount, criteriaResults } = evaluation
                     const activity = getLastActivity(candidate.id)
                     
                     return (

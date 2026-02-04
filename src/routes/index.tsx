@@ -1,6 +1,5 @@
 import { createBrowserRouter } from 'react-router'
 import { 
-  Home, 
   CandidateDetail, 
   CandidateSearchResults,
   Overview, 
