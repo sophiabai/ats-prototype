@@ -6,8 +6,8 @@ export function CandidateDetail() {
   const { id } = useParams<{ id: string }>()
 
   return (
-    <div className="container mx-auto p-6">
-      <Button variant="outline" asChild className="mb-6">
+    <div className="h-full overflow-auto">
+      <Button variant="outline" asChild className="mb-4 text-xs sm:text-sm">
         <Link to="/">← Back to Candidates</Link>
       </Button>
 

@@ -1,3 +1,10 @@
 export { Home } from './Home'
 export { CandidateDetail } from './CandidateDetail'
+export { CandidateSearchResults } from './CandidateSearchResults'
+export { Overview } from './Overview'
+export { Jobs } from './Jobs'
+export { Candidates } from './Candidates'
+export { Interviews } from './Interviews'
+export { Analytics } from './Analytics'
+export { Settings } from './Settings'
 
