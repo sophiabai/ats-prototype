@@ -2,7 +2,6 @@ import { createBrowserRouter } from 'react-router'
 import { 
   CandidateDetail, 
   CandidateSearchResults,
-  Overview, 
   Jobs, 
   Candidates, 
   Interviews, 
