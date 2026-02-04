@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useLayoutEffect, useState, useRef, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router'
 import { ArrowLeft, MoreVertical, Mail, ArrowRight, Filter, Maximize2, Search, ChevronDown, Plus, AtSign, Users, ArrowLeftToLine, ArrowRightFromLine, Table as TableIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -69,7 +69,7 @@ export function CandidateSearchResults() {
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false)
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null)
   const [isProfilePanelOpen, setIsProfilePanelOpen] = useState(false)
-  const [visibleTabsCount, setVisibleTabsCount] = useState(filterTabs.length)
+  const [visibleTabsCount, setVisibleTabsCount] = useState(filterTabs.length) // Will be calculated on mount
   const tabsContainerRef = useRef<HTMLDivElement>(null)
   const tabsRef = useRef<HTMLDivElement>(null)
   const actionsRef = useRef<HTMLDivElement>(null)
@@ -177,14 +177,22 @@ export function CandidateSearchResults() {
 
     const containerWidth = tabsContainerRef.current.offsetWidth
     const actionsWidth = actionsRef.current.offsetWidth
-    const moreButtonWidth = 80 // Approximate width for "X more..." button
+    const moreButtonWidth = 100 // Approximate width for "X more..." button
     const availableWidth = containerWidth - actionsWidth - 16 // 16px gap
 
-    // Get approximate widths for each tab (we'll measure them)
+    // Calculate estimated widths for all tabs
+    // We use estimates because we may not have all tabs rendered yet
     const tabWidths = filterTabs.map(tab => {
       // Estimate: base padding (24px) + text width (~8px per char) + count badge if applicable
       const textWidth = tab.label.length * 8
-      const badgeWidth = (tab.id === 'new' || tab.id === 'replied') ? 30 : 0
+      let badgeWidth = 0
+      if (tab.id === 'new' && results.length > 0) {
+        // Badge width depends on number of digits in count
+        const digitCount = results.length.toString().length
+        badgeWidth = 20 + (digitCount * 6) // Base width + per-digit width
+      } else if (tab.id === 'replied') {
+        badgeWidth = 20 + 6 // "2" has 1 digit
+      }
       return 24 + textWidth + badgeWidth + 8 // 8px gap between tabs
     })
 
@@ -194,7 +202,8 @@ export function CandidateSearchResults() {
     for (let i = 0; i < tabWidths.length; i++) {
       const newTotal = totalWidth + tabWidths[i]
       // If adding this tab would exceed available width (accounting for "more" button if needed)
-      if (newTotal > availableWidth - (i < tabWidths.length - 1 ? moreButtonWidth : 0)) {
+      const needsMoreButton = i < tabWidths.length - 1
+      if (newTotal > availableWidth - (needsMoreButton ? moreButtonWidth : 0)) {
         break
       }
       totalWidth = newTotal
@@ -203,18 +212,42 @@ export function CandidateSearchResults() {
 
     // Ensure at least 1 tab is visible
     setVisibleTabsCount(Math.max(1, count))
-  }, [])
+  }, [results.length])
 
-  useEffect(() => {
+  // Use useLayoutEffect for initial calculation to prevent overflow flash
+  useLayoutEffect(() => {
     calculateVisibleTabs()
+  }, [calculateVisibleTabs, isPanelCollapsed, results.length])
+
+  // Use useEffect with ResizeObserver for responsive updates
+  useEffect(() => {
+    // Use ResizeObserver to watch for container size changes
+    let resizeObserver: ResizeObserver | null = null
+    if (tabsContainerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        // Use requestAnimationFrame to batch updates
+        requestAnimationFrame(() => {
+          calculateVisibleTabs()
+        })
+      })
+      resizeObserver.observe(tabsContainerRef.current)
+    }
     
     const handleResize = () => {
-      calculateVisibleTabs()
+      requestAnimationFrame(() => {
+        calculateVisibleTabs()
+      })
     }
     
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [calculateVisibleTabs, isPanelCollapsed])
+    
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      if (resizeObserver) {
+        resizeObserver.disconnect()
+      }
+    }
+  }, [calculateVisibleTabs])
 
   // Auto-collapse search criteria when AI assistant opens
   useEffect(() => {
@@ -309,7 +342,7 @@ export function CandidateSearchResults() {
               isPanelCollapsed ? 'opacity-0 w-0 pointer-events-none' : 'opacity-100 p-6'
             }`}>
               {/* Search Criteria Header */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-6">
                 <h3 className="text-base font-semibold whitespace-nowrap">Search criteria</h3>
                 <Button 
                   variant="ghost" 
@@ -346,7 +379,7 @@ export function CandidateSearchResults() {
             </div>
 
             {/* Individual Criteria with colored borders */}
-            <div className="mb-4">
+            <div className="mb-2">
               {criteria.map((c, idx) => (
                 <div 
                   key={c.id} 
@@ -359,15 +392,14 @@ export function CandidateSearchResults() {
 
             {/* Add Criteria Button */}
             <div className="mb-6">
-              <Button variant="ghost" size="sm" className="text-sm h-8 px-2">
-                <Plus className="w-4 h-4 mr-1" />
+              <Button variant="link" size="xs" className="text-xs h-8 px-0">
                 Add criteria
               </Button>
             </div>
 
             {/* Sources Section */}
             <div className="mb-6">
-              <h4 className="text-sm font-semibold mb-3">Sources</h4>
+              <h4 className="text-sm font-semibold mb-1">Sources</h4>
               <div className="flex flex-wrap gap-2">
                 <Badge
                   variant={selectedSources.has('pool') ? 'default' : 'outline'}
@@ -402,7 +434,7 @@ export function CandidateSearchResults() {
 
             {/* Show Columns Section */}
             <div>
-              <h4 className="text-sm font-semibold mb-3">Show columns</h4>
+              <h4 className="text-sm font-semibold mb-2">Show columns</h4>
               <div className="flex flex-wrap gap-2">
                 <Badge
                   variant={selectedColumns.has('email') ? 'secondary' : 'outline'}
@@ -451,9 +483,9 @@ export function CandidateSearchResults() {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 flex flex-col overflow-hidden p-8 relative">
+          <div className="flex-1 flex flex-col overflow-hidden p-6 relative">
             {/* Page Header */}
-            <div className="flex items-center gap-3 mb-8 bg-background">
+            <div className="flex items-center gap-3 mb-6 bg-background">
               {isPanelCollapsed && (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -475,9 +507,9 @@ export function CandidateSearchResults() {
             </div>
 
             {/* Filter Tabs */}
-            <div ref={tabsContainerRef} className="flex items-center mb-8 w-full gap-4">
+            <div ref={tabsContainerRef} className="flex items-center mb-6 w-full gap-4">
               <Tabs value={activeFilter} onValueChange={(value) => setActiveFilter(value as FilterStatus)} className="flex-shrink min-w-0">
-                <TabsList ref={tabsRef} className="h-auto p-1 bg-transparent flex-wrap">
+                <TabsList ref={tabsRef} className="h-auto p-1 bg-transparent flex-nowrap">
                   {filterTabs.slice(0, visibleTabsCount).map((tab) => (
                     <TabsTrigger
                       key={tab.id}
