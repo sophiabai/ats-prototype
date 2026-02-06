@@ -5,6 +5,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useCandidatePools } from '@/lib/candidatePoolsContext'
+import { candidates } from '@/data/candidates'
 
 type SourceType = 'pool' | 'gem' | 'linkedin'
 
@@ -95,6 +96,17 @@ export function Candidates() {
         <div className="w-full max-w-4xl">
           <h2 className="text-sm font-medium text-muted-foreground mb-4">Candidate pool</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Card
+              className="cursor-pointer hover:shadow-md transition-shadow py-3 gap-3"
+              onClick={() => navigate('/candidates/all')}
+            >
+              <CardHeader className="px-4 gap-1.5">
+                <CardTitle className="text-base leading-tight line-clamp-2 min-h-[2lh]">
+                  All candidates
+                </CardTitle>
+                <CardDescription>{candidates.length.toLocaleString()} records</CardDescription>
+              </CardHeader>
+            </Card>
             {pools.map((pool) => (
               <Card 
                 key={pool.id}
@@ -102,7 +114,7 @@ export function Candidates() {
                 onClick={() => handlePoolClick(pool.id, pool.query)}
               >
                 <CardHeader className="px-4 gap-1.5">
-                  <CardTitle className="text-base leading-tight">{pool.title}</CardTitle>
+                  <CardTitle className="text-base leading-tight line-clamp-2 min-h-[2lh]">{pool.title}</CardTitle>
                   <CardDescription>{pool.resultCount.toLocaleString()} records</CardDescription>
                 </CardHeader>
               </Card>

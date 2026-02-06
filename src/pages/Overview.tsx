@@ -7,7 +7,7 @@ export function Overview() {
         <LayoutDashboard className="w-8 h-8 text-muted-foreground" />
       </div>
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-semibold">Dashboard Overview</h2>
+        <h2 className="text-2xl font-semibold">Dashboard overview</h2>
         <p className="text-muted-foreground max-w-md">
           Your recruitment dashboard will display key metrics and insights here
         </p>

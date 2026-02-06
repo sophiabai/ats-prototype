@@ -6,7 +6,14 @@ import {
   Candidates, 
   Interviews, 
   Analytics, 
-  Settings 
+  Settings,
+  Components,
+  AllCandidates,
+  Messaged,
+  Replied,
+  Interviewing,
+  HiredRejected,
+  NotInterested,
 } from '@/pages'
 import { Layout } from '@/components/Layout'
 
@@ -27,8 +34,32 @@ export const router = createBrowserRouter([
         element: <Candidates />,
       },
       {
+        path: '/candidates/all',
+        element: <AllCandidates />,
+      },
+      {
         path: '/candidates/search',
         element: <CandidateSearchResults />,
+      },
+      {
+        path: '/candidates/messaged',
+        element: <Messaged />,
+      },
+      {
+        path: '/candidates/replied',
+        element: <Replied />,
+      },
+      {
+        path: '/candidates/interviewing',
+        element: <Interviewing />,
+      },
+      {
+        path: '/candidates/hired-rejected',
+        element: <HiredRejected />,
+      },
+      {
+        path: '/candidates/not-interested',
+        element: <NotInterested />,
       },
       {
         path: '/candidate/:id',
@@ -45,6 +76,10 @@ export const router = createBrowserRouter([
       {
         path: '/settings',
         element: <Settings />,
+      },
+      {
+        path: '/components',
+        element: <Components />,
       },
     ],
   },

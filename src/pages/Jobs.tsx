@@ -8,7 +8,7 @@ export function Jobs() {
         <Briefcase className="w-8 h-8 text-muted-foreground" />
       </div>
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-semibold">No Jobs Yet</h2>
+        <h2 className="text-2xl font-semibold">No jobs yet</h2>
         <p className="text-muted-foreground max-w-md">
           Create your first job posting to start attracting candidates
         </p>

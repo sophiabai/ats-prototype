@@ -8,7 +8,7 @@ export function Interviews() {
         <Calendar className="w-8 h-8 text-muted-foreground" />
       </div>
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-semibold">No Interviews Scheduled</h2>
+        <h2 className="text-2xl font-semibold">No interviews scheduled</h2>
         <p className="text-muted-foreground max-w-md">
           Schedule your first interview to start evaluating candidates
         </p>

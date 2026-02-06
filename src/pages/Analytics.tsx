@@ -8,7 +8,7 @@ export function Analytics() {
         <BarChart3 className="w-8 h-8 text-muted-foreground" />
       </div>
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-semibold">No Analytics Data</h2>
+        <h2 className="text-2xl font-semibold">No analytics data</h2>
         <p className="text-muted-foreground max-w-md">
           Analytics and insights will appear here once you have recruitment activity
         </p>

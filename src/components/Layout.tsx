@@ -7,18 +7,16 @@ import {
   Calendar,
   ChevronRight,
   Plus,
-  Send,
-  Folder,
-  FolderOpen,
   MoreHorizontal,
   Trash2,
-  FolderPlus,
   X,
+  Mail,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { SiteNav } from './SiteNav'
 import { ChatbotPanelProvider, ChatbotPanel } from './ChatbotPanel'
 import { CandidatePoolsProvider, useCandidatePools } from '@/lib/candidatePoolsContext'
+import { MessagedCandidatesProvider } from '@/lib/messagedCandidatesContext'
 import {
   Sidebar,
   SidebarContent,
@@ -44,9 +42,6 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu'
 
 const mainNavItems = [
@@ -59,7 +54,7 @@ const mainNavItems = [
 function SidebarNav() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { pools, projects, removePool, addPoolToProject } = useCandidatePools()
+  const { pools, removePool } = useCandidatePools()
   
   return (
     <SidebarContent className="pt-4">
@@ -82,199 +77,144 @@ function SidebarNav() {
               )
             })}
 
-            {/* Candidates with nested items - under Analytics */}
+            {/* Prospect with nested items */}
             <Collapsible asChild defaultOpen={true} className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip="Candidates" isActive={false}>
+                  <SidebarMenuButton tooltip="Prospect" isActive={false}>
                     <Users className="text-gray-800" />
-                    <span className="text-gray-800">Candidates</span>
+                    <span className="text-gray-800">Prospect</span>
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-gray-800" />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
+                  {/* Talent pool - collapsible with nested pools */}
                   <SidebarMenuSub>
-                    {/* Outreach */}
-                    <SidebarMenuSubItem className="mt-2">
-                      <SidebarMenuSubButton asChild>
-                        <a href="/candidates/outreach" className="text-gray-800">
-                          <Send className="w-4 h-4 text-gray-800" />
-                          <span className="text-gray-800">Outreach</span>
-                          <Badge variant="default" className="text-[10px] px-1 py-0.5 h-4 -ml-1">3 new</Badge>
-                        </a>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-
-                    {/* New Search */}
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton 
-                        asChild 
-                        isActive={location.pathname === '/candidates'}
-                      >
-                        <a href="/candidates" className="text-gray-800">
-                          <Plus className="w-4 h-4 text-gray-800" />
-                          <span className="text-gray-800">New search</span>
-                        </a>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-
-                  {/* Projects Section - nested under Candidates */}
-                  <SidebarMenuSub className="mt-4">
-                    {/* Section Label */}
-                    <SidebarMenuSubItem>
-                      <div className="px-2 py-1.5 text-xs font-medium text-gray-800/70">
-                        Projects
-                      </div>
-                    </SidebarMenuSubItem>
-
-                    {/* New Project */}
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton>
-                        <Folder className="w-4 h-4 text-gray-800" />
-                        <span>New project</span>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-
-                    {projects.map((project) => (
-                      <Collapsible key={project.id} asChild className="group/collapsible">
-                        <SidebarMenuSubItem>
-                          {project.children && project.children.length > 0 ? (
-                            <>
-                              <CollapsibleTrigger asChild>
-                                <SidebarMenuSubButton>
-                                  {project.icon === 'folder-open' ? (
-                                    <FolderOpen className="w-4 h-4" />
-                                  ) : (
-                                    <Folder className="w-4 h-4" />
-                                  )}
-                                  <span className="truncate">{project.name}</span>
-                                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                                </SidebarMenuSubButton>
-                              </CollapsibleTrigger>
-                              <CollapsibleContent>
-                                <SidebarMenuSub>
-                                  {project.children.map((child) => (
-                                    <SidebarMenuSubItem key={child.id} className="group/child-item relative">
-                                      <SidebarMenuSubButton className="pr-8">
-                                        <span className="truncate">{child.name}</span>
-                                      </SidebarMenuSubButton>
-                                      <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                          <button className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded-md opacity-0 group-hover/child-item:opacity-100 hover:bg-sidebar-accent data-[state=open]:opacity-100">
-                                            <MoreHorizontal className="w-4 h-4" />
-                                          </button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent side="right" align="start" className="w-48">
-                                          <DropdownMenuSub>
-                                            <DropdownMenuSubTrigger>
-                                              <FolderPlus className="w-4 h-4 mr-2" />
-                                              Move to project
-                                            </DropdownMenuSubTrigger>
-                                            <DropdownMenuSubContent>
-                                              {projects.map((proj) => (
-                                                <DropdownMenuItem key={proj.id}>
-                                                  <Folder className="w-4 h-4 mr-2" />
-                                                  {proj.name}
-                                                </DropdownMenuItem>
-                                              ))}
-                                            </DropdownMenuSubContent>
-                                          </DropdownMenuSub>
-                                          <DropdownMenuItem>
-                                            <X className="w-4 h-4 mr-2" />
-                                            Remove from project
-                                          </DropdownMenuItem>
-                                          <DropdownMenuSeparator />
-                                          <DropdownMenuItem className="text-destructive">
-                                            <Trash2 className="w-4 h-4 mr-2" />
-                                            Delete
-                                          </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                      </DropdownMenu>
-                                    </SidebarMenuSubItem>
-                                  ))}
-                                </SidebarMenuSub>
-                              </CollapsibleContent>
-                            </>
-                          ) : (
-                            <SidebarMenuSubButton>
-                              <Folder className="w-4 h-4" />
-                              <span className="truncate">{project.name}</span>
-                            </SidebarMenuSubButton>
-                          )}
-                        </SidebarMenuSubItem>
-                      </Collapsible>
-                    ))}
-                  </SidebarMenuSub>
-
-                  {/* Candidate Pool Section - nested under Candidates */}
-                  <SidebarMenuSub className="mt-4">
-                    {/* Section Label */}
-                    <SidebarMenuSubItem>
-                      <div className="px-2 py-1.5 text-xs font-medium text-gray-800/70">
-                        Candidate Pool
-                      </div>
-                    </SidebarMenuSubItem>
-
-                    {(() => {
-                      const searchParams = new URLSearchParams(location.search)
-                      const currentPoolId = searchParams.get('poolId')
-                      const currentQuery = searchParams.get('q')
-                      
-                      return pools.map((pool) => {
-                        const isActive = pool.id === currentPoolId || pool.query === currentQuery
-                        
-                        return (
-                        <SidebarMenuSubItem key={pool.id} className="group/pool-item relative">
-                          <SidebarMenuSubButton 
-                            isActive={isActive}
-                            onClick={() => navigate(`/candidates/search?q=${encodeURIComponent(pool.query)}&poolId=${pool.id}`)}
-                            className="pr-8"
-                          >
-                            <span className="truncate">{pool.title}</span>
+                    <Collapsible asChild defaultOpen={true} className="group/talent-pool">
+                      <SidebarMenuSubItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuSubButton>
+                            <span className="text-gray-800">Talent pool</span>
+                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/talent-pool:rotate-90 text-gray-800" />
                           </SidebarMenuSubButton>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <button className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded-md opacity-0 group-hover/pool-item:opacity-100 hover:bg-sidebar-accent data-[state=open]:opacity-100">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent side="right" align="start" className="w-48">
-                              <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>
-                                  <FolderPlus className="w-4 h-4 mr-2" />
-                                  Add to project
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent>
-                                  {projects.map((project) => (
-                                    <DropdownMenuItem 
-                                      key={project.id}
-                                      onClick={() => addPoolToProject(pool.id, project.id)}
-                                    >
-                                      <Folder className="w-4 h-4 mr-2" />
-                                      {project.name}
-                                    </DropdownMenuItem>
-                                  ))}
-                                </DropdownMenuSubContent>
-                              </DropdownMenuSub>
-                              <DropdownMenuItem>
-                                <X className="w-4 h-4 mr-2" />
-                                Remove from list
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                className="text-destructive"
-                                onClick={() => removePool(pool.id)}
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {/* New Search */}
+                            <SidebarMenuSubItem>
+                              <SidebarMenuSubButton asChild>
+                                <a href="/candidates" className="text-gray-800">
+                                  <Plus className="w-4 h-4 text-gray-800" />
+                                  <span className="text-gray-800">New search</span>
+                                </a>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+
+                            {/* All Candidates */}
+                            <SidebarMenuSubItem>
+                              <SidebarMenuSubButton 
+                                asChild 
+                                isActive={location.pathname === '/candidates/all'}
                               >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                          </SidebarMenuSubItem>
-                        )
-                      })
-                    })()}
+                                <a href="/candidates/all" className="text-gray-800">
+                                  <Users className="w-4 h-4 text-gray-800" />
+                                  <span className="text-gray-800">All candidates</span>
+                                </a>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+
+                            {/* Pool items */}
+                            {(() => {
+                              const searchParams = new URLSearchParams(location.search)
+                              const currentPoolId = searchParams.get('poolId')
+                              const currentQuery = searchParams.get('q')
+                              
+                              const poolsWithBadge = new Set(['pool-1', 'pool-2', 'pool-3'])
+                              
+                              return pools.map((pool) => {
+                                const isActive = pool.id === currentPoolId || pool.query === currentQuery
+                                
+                                return (
+                                  <SidebarMenuSubItem key={pool.id} className="group/pool-item relative">
+                                    <SidebarMenuSubButton 
+                                      isActive={isActive}
+                                      onClick={() => navigate(`/candidates/search?q=${encodeURIComponent(pool.query)}&poolId=${pool.id}`)}
+                                      className="group-hover/pool-item:pr-8"
+                                    >
+                                      <span className="truncate">{pool.title}</span>
+                                      {poolsWithBadge.has(pool.id) && (
+                                        <Badge variant="default" className="text-[10px] px-1 py-0.5 h-4 shrink-0 group-hover/pool-item:hidden">10 new</Badge>
+                                      )}
+                                    </SidebarMenuSubButton>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <button className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded-md opacity-0 group-hover/pool-item:opacity-100 hover:bg-sidebar-accent data-[state=open]:opacity-100">
+                                          <MoreHorizontal className="w-4 h-4" />
+                                        </button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent side="right" align="start" className="w-48">
+                                        <DropdownMenuItem>
+                                          <X className="w-4 h-4 mr-2" />
+                                          Remove from list
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem 
+                                          className="text-destructive"
+                                          onClick={() => removePool(pool.id)}
+                                        >
+                                          <Trash2 className="w-4 h-4 mr-2" />
+                                          Delete
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </SidebarMenuSubItem>
+                                )
+                              })
+                            })()}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuSubItem>
+                    </Collapsible>
+                  </SidebarMenuSub>
+
+                  {/* Status items */}
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild isActive={location.pathname === '/candidates/messaged'}>
+                        <a href="/candidates/messaged" className="text-gray-800">
+                          <span className="text-gray-800">Messaged</span>
+                        </a>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild isActive={location.pathname === '/candidates/replied'}>
+                        <a href="/candidates/replied" className="text-gray-800">
+                          <span className="text-gray-800">Replied</span>
+                          <Badge variant="default" className="text-[10px] px-1 py-0.5 h-4 shrink-0">3 <Mail className="h-3 w-3" /></Badge>
+                        </a>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild isActive={location.pathname === '/candidates/interviewing'}>
+                        <a href="/candidates/interviewing" className="text-gray-800">
+                          <span className="text-gray-800">Interviewing</span>
+                        </a>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild isActive={location.pathname === '/candidates/hired-rejected'}>
+                        <a href="/candidates/hired-rejected" className="text-gray-800">
+                          <span className="text-gray-800">Hired / rejected</span>
+                        </a>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild isActive={location.pathname === '/candidates/not-interested'}>
+                        <a href="/candidates/not-interested" className="text-gray-800">
+                          <span className="text-gray-800">Not interested / no response</span>
+                        </a>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </SidebarMenuItem>
@@ -289,6 +229,7 @@ function SidebarNav() {
 export function Layout() {
   return (
     <CandidatePoolsProvider>
+      <MessagedCandidatesProvider>
       <ChatbotPanelProvider>
         <div className="h-screen flex flex-col w-full overflow-hidden">
           <SiteNav />
@@ -313,6 +254,7 @@ export function Layout() {
           </SidebarProvider>
         </div>
       </ChatbotPanelProvider>
+      </MessagedCandidatesProvider>
     </CandidatePoolsProvider>
   )
 }

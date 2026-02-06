@@ -1,8 +1,7 @@
-import { useEffect, useLayoutEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router'
-import { ArrowLeft, MoreVertical, Mail, ArrowRight, Filter, Maximize2, Search, ChevronDown, Plus, AtSign, Users, ArrowLeftToLine, ArrowRightFromLine, Table as TableIcon } from 'lucide-react'
+import { ArrowLeft, MoreVertical, Mail, ArrowRight, Filter, Maximize2, Search, ChevronDown, Plus, AtSign, Users, ArrowLeftToLine, ArrowRightFromLine, Send, ListOrdered, Clock } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -28,24 +27,94 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
 import { searchCandidates } from '@/lib/candidateSearch'
 import type { CandidateEvaluation, SearchCriterion } from '@/lib/candidateSearch'
 import { useCandidatePools } from '@/lib/candidatePoolsContext'
+import { useMessagedCandidates } from '@/lib/messagedCandidatesContext'
 import type { Candidate } from '@/data/candidates'
 import { CandidateProfilePanel } from '@/components/CandidateProfilePanel'
 import { useChatbotPanel } from '@/components/ChatbotPanel'
+import { toast } from 'sonner'
 
-type FilterStatus = 'all' | 'new' | 'messaged' | 'replied' | 'interviewing' | 'hired' | 'rejected' | 'not_interested' | 'no_reply'
-
-const filterTabs: { id: FilterStatus; label: string; count?: number }[] = [
-  { id: 'new', label: 'New prospects' },
-  { id: 'messaged', label: 'Messaged' },
-  { id: 'replied', label: 'Replied' },
-  { id: 'interviewing', label: 'Interviewing' },
-  { id: 'hired', label: 'Hired' },
-  { id: 'rejected', label: 'Rejected' },
-  { id: 'not_interested', label: 'Not interested' },
-  { id: 'no_reply', label: 'No reply' },
+const emailTemplates = [
+  {
+    id: 'intro-outreach',
+    name: 'Introduction Outreach',
+    stages: [
+      {
+        subject: 'Exciting opportunity at {{company}}',
+        body: `Hi {{firstName}},\n\nI came across your profile and was really impressed by your experience at {{currentCompany}}. We have an exciting opportunity that I think could be a great fit for your background.\n\nWould you be open to a quick chat this week to learn more?\n\nBest,\n{{senderName}}`,
+        delay: 'Immediately',
+      },
+      {
+        subject: 'Re: Exciting opportunity at {{company}}',
+        body: `Hi {{firstName}},\n\nJust wanted to follow up on my previous message. I understand you're busy, but I'd love to share more about what we're building.\n\nThe role involves leading key initiatives that align well with your experience in {{skills}}.\n\nWould a 15-minute call work for you?\n\nBest,\n{{senderName}}`,
+        delay: '3 days later',
+      },
+      {
+        subject: 'Re: Exciting opportunity at {{company}}',
+        body: `Hi {{firstName}},\n\nI wanted to reach out one last time. I truly believe this could be a transformative opportunity for your career.\n\nIf now isn't the right time, I completely understand. Feel free to reach out whenever you'd like to explore new opportunities.\n\nWishing you all the best,\n{{senderName}}`,
+        delay: '7 days later',
+      },
+    ],
+  },
+  {
+    id: 'ml-eng-outreach',
+    name: 'ML Engineer Outreach',
+    stages: [
+      {
+        subject: 'ML Engineering role — {{company}}',
+        body: `Hi {{firstName}},\n\nYour work on ML systems at {{currentCompany}} caught my attention. We're building cutting-edge AI products and looking for engineers like you to help shape our ML infrastructure.\n\nWould you be interested in learning more?\n\nBest,\n{{senderName}}`,
+        delay: 'Immediately',
+      },
+      {
+        subject: 'Re: ML Engineering role — {{company}}',
+        body: `Hi {{firstName}},\n\nFollowing up on my last note. Our ML team is tackling some really interesting challenges — from large-scale model training to real-time inference optimization.\n\nGiven your skills in {{skills}}, I think you'd thrive here. Happy to share more details over a quick call.\n\nBest,\n{{senderName}}`,
+        delay: '3 days later',
+      },
+      {
+        subject: 'Re: ML Engineering role — {{company}}',
+        body: `Hi {{firstName}},\n\nLast follow-up from me! Just wanted to make sure this didn't get lost in your inbox.\n\nOur team has shipped some exciting projects recently, and we'd love to have someone with your background on board. No pressure — happy to connect whenever timing is right.\n\nCheers,\n{{senderName}}`,
+        delay: '7 days later',
+      },
+    ],
+  },
+  {
+    id: 'senior-leadership',
+    name: 'Senior Leadership Outreach',
+    stages: [
+      {
+        subject: 'Leadership opportunity at {{company}}',
+        body: `Hi {{firstName}},\n\nI'm reaching out regarding a senior leadership position that I think aligns perfectly with your track record at {{currentCompany}}.\n\nThis role offers the chance to lead a growing team and drive strategic initiatives. Would you have 20 minutes this week for a confidential conversation?\n\nBest regards,\n{{senderName}}`,
+        delay: 'Immediately',
+      },
+      {
+        subject: 'Re: Leadership opportunity at {{company}}',
+        body: `Hi {{firstName}},\n\nI wanted to follow up on my previous message. The leaders who thrive here share many qualities I see in your background — strategic vision, technical depth, and team-building experience.\n\nI'd love to share more details. Would you be open to connecting?\n\nBest regards,\n{{senderName}}`,
+        delay: '4 days later',
+      },
+      {
+        subject: 'Re: Leadership opportunity at {{company}}',
+        body: `Hi {{firstName}},\n\nI appreciate your time and wanted to reach out once more. This is a unique opportunity that doesn't come around often.\n\nIf the timing isn't right, I fully understand. Please don't hesitate to reach out in the future.\n\nAll the best,\n{{senderName}}`,
+        delay: '7 days later',
+      },
+    ],
+  },
 ]
 
 export function CandidateSearchResults() {
@@ -53,6 +122,7 @@ export function CandidateSearchResults() {
   const navigate = useNavigate()
   const { addPool, pools } = useCandidatePools()
   const { isOpen: isAIAssistantOpen } = useChatbotPanel()
+  const { addMessagedCandidates } = useMessagedCandidates()
   const query = searchParams.get('q') || ''
   const poolId = searchParams.get('poolId')
   
@@ -62,17 +132,49 @@ export function CandidateSearchResults() {
   const [criteria, setCriteria] = useState<SearchCriterion[]>([])
   const [title, setTitle] = useState<string>('')
   const [selectedCandidates, setSelectedCandidates] = useState<Set<string>>(new Set())
-  const [activeFilter, setActiveFilter] = useState<FilterStatus>('new')
   const [searchFilter, setSearchFilter] = useState('')
   const [selectedSources, setSelectedSources] = useState<Set<string>>(new Set(['pool']))
   const [selectedColumns, setSelectedColumns] = useState<Set<string>>(new Set(['email', 'phone', 'lastInteraction', 'feedback', 'lastApplication']))
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false)
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null)
   const [isProfilePanelOpen, setIsProfilePanelOpen] = useState(false)
-  const [visibleTabsCount, setVisibleTabsCount] = useState(filterTabs.length) // Will be calculated on mount
-  const tabsContainerRef = useRef<HTMLDivElement>(null)
-  const tabsRef = useRef<HTMLDivElement>(null)
-  const actionsRef = useRef<HTMLDivElement>(null)
+  const [isSequenceDialogOpen, setIsSequenceDialogOpen] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('')
+  const [activeStage, setActiveStage] = useState(0)
+  const [isSending, setIsSending] = useState(false)
+
+  const selectedTemplateData = emailTemplates.find(t => t.id === selectedTemplate)
+
+  const handleSendSequence = async () => {
+    if (!selectedTemplateData) return
+    setIsSending(true)
+    // Simulate sending
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    const now = new Date().toISOString()
+    const candidatesToMessage = results
+      .filter(r => selectedCandidates.has(r.candidate.id))
+      .map(r => ({
+        candidate: r.candidate,
+        sentAt: now,
+        sentBy: 'You',
+        sequenceName: selectedTemplateData.name,
+      }))
+    
+    addMessagedCandidates(candidatesToMessage)
+    setIsSending(false)
+    setIsSequenceDialogOpen(false)
+    const count = candidatesToMessage.length
+    setSelectedTemplate('')
+    setActiveStage(0)
+    setSelectedCandidates(new Set())
+    toast(`${count} candidate${count !== 1 ? 's' : ''} added to sequence`, {
+      action: {
+        label: 'View',
+        onClick: () => navigate('/candidates/messaged'),
+      },
+    })
+  }
   
   // Ref to track queries that have had pools added (prevents duplicate additions in StrictMode)
   const addedPoolsRef = useRef<Set<string>>(new Set())
@@ -149,11 +251,8 @@ export function CandidateSearchResults() {
             // Mark as added BEFORE calling addPool to prevent race conditions
             addedPoolsRef.current.add(query)
             
-            const truncatedTitle = searchResult.title.length > 30 
-              ? searchResult.title.substring(0, 27) + '...'
-              : searchResult.title
             const newPoolId = addPool({
-              title: truncatedTitle,
+              title: searchResult.title,
               query: query,
               resultCount: searchResult.evaluations.length,
             })
@@ -170,84 +269,6 @@ export function CandidateSearchResults() {
 
     performSearch()
   }, [query, navigate, poolId, addPool, pools, setSearchParams])
-
-  // Calculate visible tabs based on available width
-  const calculateVisibleTabs = useCallback(() => {
-    if (!tabsContainerRef.current || !actionsRef.current) return
-
-    const containerWidth = tabsContainerRef.current.offsetWidth
-    const actionsWidth = actionsRef.current.offsetWidth
-    const moreButtonWidth = 100 // Approximate width for "X more..." button
-    const availableWidth = containerWidth - actionsWidth - 16 // 16px gap
-
-    // Calculate estimated widths for all tabs
-    // We use estimates because we may not have all tabs rendered yet
-    const tabWidths = filterTabs.map(tab => {
-      // Estimate: base padding (24px) + text width (~8px per char) + count badge if applicable
-      const textWidth = tab.label.length * 8
-      let badgeWidth = 0
-      if (tab.id === 'new' && results.length > 0) {
-        // Badge width depends on number of digits in count
-        const digitCount = results.length.toString().length
-        badgeWidth = 20 + (digitCount * 6) // Base width + per-digit width
-      } else if (tab.id === 'replied') {
-        badgeWidth = 20 + 6 // "2" has 1 digit
-      }
-      return 24 + textWidth + badgeWidth + 8 // 8px gap between tabs
-    })
-
-    let totalWidth = 0
-    let count = 0
-    
-    for (let i = 0; i < tabWidths.length; i++) {
-      const newTotal = totalWidth + tabWidths[i]
-      // If adding this tab would exceed available width (accounting for "more" button if needed)
-      const needsMoreButton = i < tabWidths.length - 1
-      if (newTotal > availableWidth - (needsMoreButton ? moreButtonWidth : 0)) {
-        break
-      }
-      totalWidth = newTotal
-      count++
-    }
-
-    // Ensure at least 1 tab is visible
-    setVisibleTabsCount(Math.max(1, count))
-  }, [results.length])
-
-  // Use useLayoutEffect for initial calculation to prevent overflow flash
-  useLayoutEffect(() => {
-    calculateVisibleTabs()
-  }, [calculateVisibleTabs, isPanelCollapsed, results.length])
-
-  // Use useEffect with ResizeObserver for responsive updates
-  useEffect(() => {
-    // Use ResizeObserver to watch for container size changes
-    let resizeObserver: ResizeObserver | null = null
-    if (tabsContainerRef.current) {
-      resizeObserver = new ResizeObserver(() => {
-        // Use requestAnimationFrame to batch updates
-        requestAnimationFrame(() => {
-          calculateVisibleTabs()
-        })
-      })
-      resizeObserver.observe(tabsContainerRef.current)
-    }
-    
-    const handleResize = () => {
-      requestAnimationFrame(() => {
-        calculateVisibleTabs()
-      })
-    }
-    
-    window.addEventListener('resize', handleResize)
-    
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      if (resizeObserver) {
-        resizeObserver.disconnect()
-      }
-    }
-  }, [calculateVisibleTabs])
 
   // Auto-collapse search criteria when AI assistant opens
   useEffect(() => {
@@ -504,59 +525,7 @@ export function CandidateSearchResults() {
                 </Tooltip>
               )}
               <h1 className="text-lg font-semibold">{title || query}</h1>
-            </div>
-
-            {/* Filter Tabs */}
-            <div ref={tabsContainerRef} className="flex items-center mb-6 w-full gap-4">
-              <Tabs value={activeFilter} onValueChange={(value) => setActiveFilter(value as FilterStatus)} className="flex-shrink min-w-0">
-                <TabsList ref={tabsRef} className="h-auto p-1 bg-transparent flex-nowrap">
-                  {filterTabs.slice(0, visibleTabsCount).map((tab) => (
-                    <TabsTrigger
-                      key={tab.id}
-                      value={tab.id}
-                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-3 py-1 text-sm whitespace-nowrap"
-                    >
-                      {tab.label}
-                      {tab.id === 'new' && (
-                        <span className="ml-1.5 bg-primary-foreground/20 text-current rounded-full px-1.5 text-xs">
-                          {results.length}
-                        </span>
-                      )}
-                      {tab.id === 'replied' && (
-                        <span className="ml-1.5 bg-primary-foreground/20 text-current rounded-full px-1.5 text-xs">
-                          2
-                        </span>
-                      )}
-                    </TabsTrigger>
-                  ))}
-                  {visibleTabsCount < filterTabs.length && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant={filterTabs.slice(visibleTabsCount).some(t => t.id === activeFilter) ? "default" : "ghost"} 
-                          size="sm" 
-                          className="rounded-full px-3 py-1 text-sm h-auto"
-                        >
-                          <TableIcon className="h-3.5 w-3.5 mr-1" />
-                          {filterTabs.length - visibleTabsCount} more...
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
-                        {filterTabs.slice(visibleTabsCount).map((tab) => (
-                          <DropdownMenuItem
-                            key={tab.id}
-                            onClick={() => setActiveFilter(tab.id)}
-                            className={activeFilter === tab.id ? 'bg-accent' : ''}
-                          >
-                            {tab.label}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </TabsList>
-              </Tabs>
-              <div ref={actionsRef} className="flex items-center gap-2 ml-auto flex-shrink-0">
+              <div className="flex items-center gap-2 ml-auto flex-shrink-0">
                 <Button variant="ghost" size="icon">
                   <Filter className="h-4 w-4" />
                 </Button>
@@ -572,6 +541,26 @@ export function CandidateSearchResults() {
                     onChange={(e) => setSearchFilter(e.target.value)}
                   />
                 </div>
+                {selectedCandidates.size > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button>
+                        <Mail className="h-4 w-4" />
+                        Message ({selectedCandidates.size})
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setIsSequenceDialogOpen(true)}>
+                        <ListOrdered className="h-4 w-4 mr-2" />
+                        Add to sequence
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Send className="h-4 w-4 mr-2" />
+                        Send one-time message
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
 
@@ -663,7 +652,11 @@ export function CandidateSearchResults() {
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Badge variant="outline" className="cursor-help">
+                              <Badge className={`cursor-help border-0 ${
+                                metCount === criteriaResults.length
+                                  ? 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300'
+                                  : 'bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300'
+                              }`}>
                                 {metCount} met
                               </Badge>
                             </TooltipTrigger>
@@ -745,6 +738,123 @@ export function CandidateSearchResults() {
           </div>
         </div>
       </div>
+
+      {/* Sequence Dialog */}
+      <Dialog open={isSequenceDialogOpen} onOpenChange={(open) => {
+        setIsSequenceDialogOpen(open)
+        if (!open) {
+          setSelectedTemplate('')
+          setActiveStage(0)
+        }
+      }}>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add {selectedCandidates.size} prospect{selectedCandidates.size !== 1 ? 's' : ''} to sequence</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Email sequence template</label>
+              <Select value={selectedTemplate} onValueChange={(val) => { setSelectedTemplate(val); setActiveStage(0) }}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Choose a template..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {emailTemplates.map(t => (
+                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {selectedTemplateData && (
+              <>
+                <div>
+                  {/* Stage timeline navigation */}
+                  <div className="flex items-center mb-4">
+                    {selectedTemplateData.stages.map((stage, idx) => (
+                      <div key={idx} className="flex items-center flex-1 last:flex-none">
+                        <button
+                          onClick={() => setActiveStage(idx)}
+                          className="flex items-center gap-2 cursor-pointer group"
+                        >
+                          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${
+                            idx === activeStage
+                              ? 'bg-primary text-primary-foreground ring-2 ring-primary/20'
+                              : idx < activeStage
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted text-muted-foreground group-hover:bg-muted-foreground/20'
+                          }`}>
+                            {idx + 1}
+                          </div>
+                          <span className={`text-xs whitespace-nowrap ${
+                            idx === activeStage ? 'text-foreground font-medium' : 'text-muted-foreground'
+                          }`}>{stage.delay}</span>
+                        </button>
+                        {idx < selectedTemplateData.stages.length - 1 && (
+                          <div className={`flex-1 h-px mx-3 ${
+                            idx < activeStage ? 'bg-primary' : 'bg-border'
+                          }`} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Email preview */}
+                  <div className="border rounded-lg overflow-hidden">
+                    <div className="bg-muted/50 px-4 py-3 space-y-1">
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-muted-foreground font-medium w-16">From:</span>
+                        <span>You &lt;you@company.com&gt;</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-muted-foreground font-medium w-16">To:</span>
+                        <span className="text-muted-foreground">{selectedCandidates.size} recipient{selectedCandidates.size !== 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-muted-foreground font-medium w-16">Subject:</span>
+                        <span className="font-medium">{selectedTemplateData.stages[activeStage].subject}</span>
+                      </div>
+                    </div>
+                    <Separator />
+                    <div className="px-4 py-4">
+                      <pre className="whitespace-pre-wrap text-sm font-sans leading-relaxed text-foreground">
+                        {selectedTemplateData.stages[activeStage].body}
+                      </pre>
+                    </div>
+                    <div className="bg-muted/30 px-4 py-2 flex items-center gap-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      Sends: {selectedTemplateData.stages[activeStage].delay}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsSequenceDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              disabled={!selectedTemplate || isSending}
+              onClick={handleSendSequence}
+            >
+              {isSending ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4" />
+                  Send sequence
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </TooltipProvider>
   )
 }

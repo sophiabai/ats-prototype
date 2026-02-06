@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 
 const navItems = [
   { icon: Inbox, label: 'Inbox', href: '/inbox' },
-  { icon: Users, label: 'Candidates', href: '/' },
+  { icon: Users, label: 'Prospect', href: '/' },
   { icon: Briefcase, label: 'Jobs', href: '/jobs' },
   { icon: Calendar, label: 'Interviews', href: '/interviews' },
   { icon: Star, label: 'Talent Pool', href: '/talent-pool' },
