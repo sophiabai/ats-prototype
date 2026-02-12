@@ -1,5 +1,6 @@
-import { createBrowserRouter } from 'react-router'
+import { createBrowserRouter, Navigate } from 'react-router'
 import { 
+  Home,
   CandidateDetail, 
   CandidateSearchResults,
   Jobs, 
@@ -16,14 +17,24 @@ import {
   NotInterested,
 } from '@/pages'
 import { Layout } from '@/components/Layout'
+import { HomeLayout } from '@/components/HomeLayout'
 
 export const router = createBrowserRouter([
+  {
+    element: <HomeLayout />,
+    children: [
+      {
+        path: '/home',
+        element: <Home />,
+      },
+    ],
+  },
   {
     element: <Layout />,
     children: [
       {
         path: '/',
-        element: <Candidates />,
+        element: <Navigate to="/home" replace />,
       },
       {
         path: '/jobs',
