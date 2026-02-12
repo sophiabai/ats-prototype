@@ -61,12 +61,12 @@ export function SearchInput({
         onKeyDown={handleKeyDown}
         disabled={disabled}
         className={cn(
-          "resize-none border-0 focus-visible:ring-0 pr-16 text-base",
+          "resize-none border-0 focus-visible:ring-0 pl-4 pr-12 pb-2 text-base text-left",
           minHeight && `min-h-[${minHeight}]`
         )}
         style={{ minHeight }}
       />
-      <div className="absolute bottom-4 left-4 flex gap-2">
+      <div className="absolute bottom-2 left-4 flex gap-2">
         {showAttachButton && (
           <Button variant="ghost" size="icon" className="h-8 w-8" disabled={disabled}>
             <Plus className="w-4 h-4" />
@@ -78,7 +78,7 @@ export function SearchInput({
           </Button>
         )}
       </div>
-      <div className="absolute bottom-4 right-4">
+      <div className="absolute bottom-2 right-4">
         <Button 
           size="icon" 
           className="h-8 w-8 rounded-md"

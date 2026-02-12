@@ -1,0 +1,32 @@
+---
+description: Scope all changes to the AI Assistant panel and its entry point only
+alwaysApply: true
+---
+
+# ATS Prototype — AI Assistant scope
+
+For this project, **only** modify the AI Assistant panel and its entry point. Do not change the home page, other pages, or any other part of the prototype.
+
+## In scope (OK to edit)
+
+- **AI Assistant panel**
+  - `src/components/ChatbotPanel.tsx` — panel shell (header “AI Assistant”, subtitle “Ask anything about recruiting”, close button), open/close state, renders `Chatbot`.
+  - `src/components/Chatbot.tsx` — chat UI (welcome message, suggestions, input, messages, disclaimer “AI may make mistakes. Verify important information.”).
+- **AI entry point**
+  - In `src/components/SiteNav.tsx`: the sparkle button that opens the panel. It uses `useChatbotPanel().toggle`, has classes `p-2 rounded-md transition-all text-white bg-gradient-to-br from-berry-light to-berry shadow-lg shadow-berry/25` when active (and `text-white/80 hover:text-white hover:bg-white/10` when inactive). Only change this button or its behavior; leave the rest of SiteNav (logo, search, other icons) unchanged unless it’s required for the entry point.
+
+## Out of scope (do not edit)
+
+- Home page, Layout, HomeLayout, Sidebar, other nav.
+- All pages under `src/pages/` (Candidates, Jobs, Analytics, etc.).
+- Other components (e.g. CandidateProfilePanel, CandidateMessageTable), data, routes, API, server — unless a change is strictly required to support the AI Assistant panel or its entry point.
+
+## Opening the panel
+
+The panel is opened by clicking the AI entry point: the sparkle icon in the top nav with the berry gradient when active (`from-berry-light to-berry`). It lives in `SiteNav` and toggles `ChatbotPanel` via `ChatbotPanelProvider` (used in both `Layout` and `HomeLayout`).
+
+## Workflows from the panel
+
+The AI panel does **not** change the home page or main content. It kicks off workflows that either:
+- **Navigate away** (e.g. "Go to Payroll" → `navigate('/jobs')`), or
+- **Open a modal** on top of the current page (side sheet for Payroll Runboard, Submit payroll, Variance, Resolve). Modal state and content are in `WorkflowModalProvider` and `WorkflowModal.tsx`.

@@ -14,6 +14,8 @@ import {
 } from 'lucide-react'
 import { SiteNav } from './SiteNav'
 import { ChatbotPanelProvider, ChatbotPanel } from './ChatbotPanel'
+import { WorkflowModalProvider } from '@/lib/workflowModalContext'
+import { WorkflowModal } from './WorkflowModal'
 import { CandidatePoolsProvider } from '@/lib/candidatePoolsContext'
 import { MessagedCandidatesProvider } from '@/lib/messagedCandidatesContext'
 import { Separator } from '@/components/ui/separator'
@@ -111,8 +113,9 @@ export function HomeLayout() {
     <CandidatePoolsProvider>
       <MessagedCandidatesProvider>
         <ChatbotPanelProvider>
-          <div className="h-screen flex flex-col w-full overflow-hidden">
-            <SiteNav />
+          <WorkflowModalProvider>
+            <div className="h-screen flex flex-col w-full overflow-hidden">
+              <SiteNav />
             <div className="flex flex-1 overflow-hidden">
               <IconSidebar />
 
@@ -126,7 +129,9 @@ export function HomeLayout() {
                 <ChatbotPanel />
               </div>
             </div>
-          </div>
+            </div>
+            <WorkflowModal />
+          </WorkflowModalProvider>
         </ChatbotPanelProvider>
       </MessagedCandidatesProvider>
     </CandidatePoolsProvider>

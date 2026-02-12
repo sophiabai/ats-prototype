@@ -15,6 +15,8 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { SiteNav } from './SiteNav'
 import { ChatbotPanelProvider, ChatbotPanel } from './ChatbotPanel'
+import { WorkflowModalProvider } from '@/lib/workflowModalContext'
+import { WorkflowModal } from './WorkflowModal'
 import { CandidatePoolsProvider, useCandidatePools } from '@/lib/candidatePoolsContext'
 import { MessagedCandidatesProvider } from '@/lib/messagedCandidatesContext'
 import {
@@ -231,8 +233,9 @@ export function Layout() {
     <CandidatePoolsProvider>
       <MessagedCandidatesProvider>
       <ChatbotPanelProvider>
-        <div className="h-screen flex flex-col w-full overflow-hidden">
-          <SiteNav />
+        <WorkflowModalProvider>
+          <div className="h-screen flex flex-col w-full overflow-hidden">
+            <SiteNav />
           <SidebarProvider>
             <div className="flex flex-1 overflow-hidden">
               <Sidebar>
@@ -252,7 +255,9 @@ export function Layout() {
               </div>
             </div>
           </SidebarProvider>
-        </div>
+          </div>
+          <WorkflowModal />
+        </WorkflowModalProvider>
       </ChatbotPanelProvider>
       </MessagedCandidatesProvider>
     </CandidatePoolsProvider>

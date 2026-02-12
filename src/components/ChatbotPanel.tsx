@@ -1,8 +1,18 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
 import { X, Sparkles } from 'lucide-react'
-import { Chatbot } from './Chatbot'
+import { SuperAdminPanel } from './SuperAdminPanel'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+
+export type WorkQueueItemType = 'payroll_missing_inputs' | 'time_non_compliant' | 'it_non_compliant' | 'spend_expense_pending'
+export interface WorkQueueItem {
+  id: string
+  type: WorkQueueItemType
+  title: string
+  count: number
+  product: string
+  resolved?: boolean
+}
 
 interface ChatbotPanelContextType {
   isOpen: boolean
@@ -23,7 +33,6 @@ export function useChatbotPanel() {
 
 export function ChatbotPanelProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
-
   const toggle = () => setIsOpen((prev) => !prev)
   const open = () => setIsOpen(true)
   const close = () => setIsOpen(false)
@@ -49,9 +58,9 @@ export function ChatbotPanel() {
         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground shadow-md">
           <Sparkles className="w-4 h-4" />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <h3 className="text-sm font-semibold text-foreground">AI Assistant</h3>
-          <p className="text-xs text-muted-foreground">Ask anything about recruiting</p>
+          <p className="text-xs text-muted-foreground truncate">Answers, actions & advice · HRIS, Benefits, Payroll, Time, ATS & more</p>
         </div>
         <Button
           variant="ghost"
@@ -63,7 +72,7 @@ export function ChatbotPanel() {
         </Button>
       </div>
       <div className="flex-1 overflow-hidden">
-        {isOpen && <Chatbot showHeader={false} className="h-full rounded-none border-0" />}
+        {isOpen && <SuperAdminPanel />}
       </div>
     </div>
   )
