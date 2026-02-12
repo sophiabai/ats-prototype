@@ -1,0 +1,14 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" rx="40" fill="#7C3AED"/>
+  <path fill-rule="evenodd" clip-rule="evenodd" d="
+    M100 30
+    L115 70 L155 55 L130 85 L170 90 L135 110 L160 145 L120 125 L110 170
+    L100 130 L90 170 L80 125 L40 145 L65 110 L30 90 L70 85 L45 55 L85 70
+    Z
+    M100 75
+    L90 90 L75 95 L85 105 L80 120 L95 115 L100 130 L105 115 L120 120
+    L115 105 L125 95 L110 90
+    Z
+  " fill="white"/>
+</svg>
+
