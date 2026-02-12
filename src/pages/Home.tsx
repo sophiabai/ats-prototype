@@ -40,6 +40,8 @@ import {
 } from "@/components/ui/carousel"
 import { candidates } from "@/data/candidates"
 import { WidgetLibraryModal } from "@/components/WidgetLibraryModal"
+import { useChatbotPanel } from "@/components/ChatbotPanel"
+import { DEFAULT_FEEDBACK_REMINDER_MESSAGE } from "@/components/SuperAdminPanel"
 
 
 const pipelineStages = [
@@ -125,6 +127,7 @@ const ptoList = [
 
 
 export function Home() {
+  const { openWithFeedbackReminder } = useChatbotPanel()
   const [widgetLibraryOpen, setWidgetLibraryOpen] = useState(false)
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -344,7 +347,16 @@ export function Home() {
                       </div>
                     ))}
                   </div>
-                  <Button variant="secondary" className="w-full mt-4">
+                  <Button
+                    variant="secondary"
+                    className="w-full mt-4"
+                    onClick={() =>
+                      openWithFeedbackReminder({
+                        recipients: feedbackItems,
+                        draftMessage: DEFAULT_FEEDBACK_REMINDER_MESSAGE,
+                      })
+                    }
+                  >
                     Send Reminders
                   </Button>
                 </CardContent>

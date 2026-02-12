@@ -14,11 +14,24 @@ export interface WorkQueueItem {
   resolved?: boolean
 }
 
+export interface FeedbackReminderRecipient {
+  name: string
+  overdue: number
+}
+
+export interface FeedbackReminderDraft {
+  recipients: FeedbackReminderRecipient[]
+  draftMessage: string
+}
+
 interface ChatbotPanelContextType {
   isOpen: boolean
   toggle: () => void
   open: () => void
   close: () => void
+  feedbackReminderDraft: FeedbackReminderDraft | null
+  openWithFeedbackReminder: (draft: FeedbackReminderDraft) => void
+  clearFeedbackReminderDraft: () => void
 }
 
 const ChatbotPanelContext = createContext<ChatbotPanelContextType | null>(null)
@@ -33,12 +46,31 @@ export function useChatbotPanel() {
 
 export function ChatbotPanelProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [feedbackReminderDraft, setFeedbackReminderDraft] = useState<FeedbackReminderDraft | null>(null)
   const toggle = () => setIsOpen((prev) => !prev)
   const open = () => setIsOpen(true)
-  const close = () => setIsOpen(false)
+  const close = () => {
+    setIsOpen(false)
+    setFeedbackReminderDraft(null)
+  }
+  const openWithFeedbackReminder = (draft: FeedbackReminderDraft) => {
+    setFeedbackReminderDraft(draft)
+    setIsOpen(true)
+  }
+  const clearFeedbackReminderDraft = () => setFeedbackReminderDraft(null)
 
   return (
-    <ChatbotPanelContext.Provider value={{ isOpen, toggle, open, close }}>
+    <ChatbotPanelContext.Provider
+      value={{
+        isOpen,
+        toggle,
+        open,
+        close,
+        feedbackReminderDraft,
+        openWithFeedbackReminder,
+        clearFeedbackReminderDraft,
+      }}
+    >
       {children}
     </ChatbotPanelContext.Provider>
   )
