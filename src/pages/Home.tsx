@@ -124,7 +124,7 @@ export function Home() {
               const wave3 = Math.cos(i * 0.12) * 15
               const randomness = Math.sin(i * 0.5) * 10
               const height = Math.max(20, baseHeight + wave1 + wave2 + wave3 + randomness + (i > 30 ? 30 : 0))
-              
+
               return (
                 <div
                   key={i}

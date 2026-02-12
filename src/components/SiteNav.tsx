@@ -1,9 +1,18 @@
-import { Search, HelpCircle, Globe, Copy, Bell, Sparkles } from 'lucide-react'
+import { Search, HelpCircle, Globe, Copy, Bell, Sparkles, ChevronDown, User, Zap } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useChatbotPanel } from './ChatbotPanel'
+import { usePersonaMode, PERSONA_LABELS, MODE_LABELS, type Persona, type HomeMode } from '@/lib/personaModeContext'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
 
 export function SiteNav() {
   const { toggle, isOpen } = useChatbotPanel()
+  const { persona, setPersona, mode, setMode } = usePersonaMode()
 
   return (
     <nav className="bg-berry-dark flex items-center px-4 py-3 gap-4 font-light">
@@ -40,6 +49,42 @@ export function SiteNav() {
           />
         </div>
       </div>
+
+      {/* Persona Switcher */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/10 gap-1.5 font-normal">
+            <User className="w-4 h-4" />
+            <span className="text-sm">{PERSONA_LABELS[persona]}</span>
+            <ChevronDown className="w-4 h-4 opacity-70" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[180px]">
+          {(['super_admin', 'recruiting_admin', 'employee', 'manager'] as Persona[]).map((p) => (
+            <DropdownMenuItem key={p} onClick={() => setPersona(p)}>
+              {PERSONA_LABELS[p]}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Mode Switcher */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/10 gap-1.5 font-normal">
+            <Zap className="w-4 h-4" />
+            <span className="text-sm">{MODE_LABELS[mode]}</span>
+            <ChevronDown className="w-4 h-4 opacity-70" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[180px]">
+          {(['default', 'payroll_week', 'security_incident', 'open_enrollment'] as HomeMode[]).map((m) => (
+            <DropdownMenuItem key={m} onClick={() => setMode(m)}>
+              {MODE_LABELS[m]}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* Right Side Icons */}
       <div className="flex items-center gap-1">
