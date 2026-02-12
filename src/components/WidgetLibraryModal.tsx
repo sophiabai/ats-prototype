@@ -365,20 +365,11 @@ export function WidgetLibraryModal({ open, onOpenChange }: WidgetLibraryModalPro
         {/* Header */}
         <div className="px-6 pt-6 pb-4">
           <DialogHeader>
-            <DialogTitle>Widget Library</DialogTitle>
+            <DialogTitle>Widget library</DialogTitle>
             <DialogDescription>
               Browse and add widgets to your dashboard
             </DialogDescription>
           </DialogHeader>
-          <div className="relative mt-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            <Input
-              placeholder="Search widgets..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
-          </div>
         </div>
 
         <Separator />
@@ -387,6 +378,17 @@ export function WidgetLibraryModal({ open, onOpenChange }: WidgetLibraryModalPro
         <div className="flex flex-1 overflow-hidden min-h-[420px]">
           {/* Left Sidebar */}
           <nav className="w-56 border-r overflow-y-auto shrink-0 py-2">
+            <div className="px-3 pb-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search widgets..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </div>
             <button
               onClick={() => setSelectedApp(null)}
               className={cn(

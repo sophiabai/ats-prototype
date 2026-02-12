@@ -1,23 +1,16 @@
 import { useState, useEffect, useCallback } from "react"
 import {
   ArrowRight,
-  Heart,
-  Palmtree,
   Clock,
   AlertTriangle,
   Monitor,
   FileText,
   GraduationCap,
   Plus,
-  Briefcase,
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
   Calendar,
-  Database,
-  BarChart3,
-  Zap,
-  Info,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -40,9 +33,15 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel"
 import { candidates } from "@/data/candidates"
+import gongImg from "@/images/1 gong.png"
+import gemImg from "@/images/2. gem.jpeg"
+import salesforceImg from "@/images/3. salesforce.png"
+import confluenceImg from "@/images/4. confluence.jpg"
 import { WidgetLibraryModal } from "@/components/WidgetLibraryModal"
+import { CandidateProfilePanel } from "@/components/CandidateProfilePanel"
 import { useChatbotPanel } from "@/components/ChatbotPanel"
 import { DEFAULT_FEEDBACK_REMINDER_MESSAGE } from "@/components/SuperAdminPanel"
+import type { Candidate } from "@/data/candidates"
 
 
 const pipelineStages = [
@@ -63,7 +62,7 @@ const interviewSchedule = [
   { time: "4:30 PM", candidate: "Dev P.", stage: "Final", avatar: "DP" },
 ]
 
-const recentApplications = candidates.slice(0, 5)
+const recentApplications = candidates.slice(0, 5).filter(c => c.name !== "Jennifer Walsh")
 
 const workQueueItems = [
   { icon: Clock, title: "Submit weekly timecard", due: "Due Friday", tag: "Payroll", priority: "medium" as const },
@@ -74,16 +73,16 @@ const workQueueItems = [
 ]
 
 const quickActions = [
-  { label: "Post a new job", icon: Briefcase },
-  { label: "Schedule interview", icon: Calendar },
-  { label: "Review applications", icon: ClipboardCheck },
+  { label: "Request time off", icon: Calendar },
+  { label: "View paystub", icon: FileText },
+  { label: "View tax docs", icon: ClipboardCheck },
 ]
 
 const appLinks = [
-  { name: "Gong", icon: Zap, color: "bg-violet-100 text-violet-700" },
-  { name: "Salesforce", icon: Database, color: "bg-sky-100 text-sky-700" },
-  { name: "Tableau", icon: BarChart3, color: "bg-amber-100 text-amber-700" },
-  { name: "Confluence", icon: FileText, color: "bg-blue-100 text-blue-700" },
+  { name: "Gong", image: gongImg },
+  { name: "Gem", image: gemImg },
+  { name: "Salesforce", image: salesforceImg },
+  { name: "Confluence", image: confluenceImg },
 ]
 
 const stuckCandidates = [
@@ -132,6 +131,18 @@ export function Home() {
   const [widgetLibraryOpen, setWidgetLibraryOpen] = useState(false)
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null)
+  const [isProfilePanelOpen, setIsProfilePanelOpen] = useState(false)
+
+  const handleCandidateClick = (candidate: Candidate) => {
+    setSelectedCandidate(candidate)
+    setIsProfilePanelOpen(true)
+  }
+
+  const handleProfilePanelClose = () => {
+    setIsProfilePanelOpen(false)
+    setSelectedCandidate(null)
+  }
 
   const onSelect = useCallback(() => {
     if (!carouselApi) return
@@ -148,13 +159,13 @@ export function Home() {
   }, [carouselApi, onSelect])
 
   return (
-    <div className="flex flex-col gap-6 overflow-auto bg-muted/30 -m-6 p-8">
+    <div className="relative flex flex-col gap-6 overflow-auto bg-muted/30 -m-6 p-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Good morning ☀️</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Thursday, February 12 · Senior Recruiter
+            Thursday, February 12
           </p>
         </div>
         <Button variant="secondary" size="sm" onClick={() => setWidgetLibraryOpen(true)}>
@@ -168,19 +179,13 @@ export function Home() {
       {/* Carousel + Quick Actions / Approvals / Apps Row */}
       <div className="grid grid-cols-3 gap-6">
         {/* Recent Applications / Hiring Pipeline / Today's Interviews Carousel */}
-        <Card className="overflow-hidden col-span-2">
-          <Carousel setApi={setCarouselApi} opts={{ loop: false }}>
-            <CarouselContent className="ml-0">
+        <Card className="overflow-hidden col-span-2 pb-6 flex flex-col">
+          <Carousel setApi={setCarouselApi} opts={{ loop: false }} className="flex flex-col flex-1">
+            <CarouselContent className="ml-0 flex-1">
               {/* Slide 1: Recent Applications */}
-              <CarouselItem className="pl-0 space-y-4">
+              <CarouselItem className="pl-0 space-y-6">
                 <CardHeader>
-                  <CardTitle>New Applications</CardTitle>
-                  <CardAction>
-                    <Button variant="ghost" size="sm">
-                      View all
-                      <ChevronRight className="size-4" />
-                    </Button>
-                  </CardAction>
+                  <CardTitle>New applications</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-1">
@@ -212,7 +217,7 @@ export function Home() {
                             >
                               {candidate.fitLevel}
                             </Badge>
-                            <Button variant="ghost" size="icon" className="size-8">
+                            <Button variant="ghost" size="icon" className="size-8" onClick={() => handleCandidateClick(candidate)}>
                               <ArrowRight className="size-3.5" />
                             </Button>
                           </div>
@@ -224,16 +229,10 @@ export function Home() {
               </CarouselItem>
 
               {/* Slide 2: Hiring Pipeline */}
-              <CarouselItem className="pl-0 space-y-4">
+              <CarouselItem className="pl-0 space-y-6">
                 <CardHeader>
-                  <CardTitle>Hiring Pipeline</CardTitle>
+                  <CardTitle>Hiring pipeline</CardTitle>
                   <CardDescription>Current candidate distribution across stages</CardDescription>
-                  <CardAction>
-                    <Button variant="ghost" size="sm">
-                      View all
-                      <ChevronRight className="size-4" />
-                    </Button>
-                  </CardAction>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {pipelineStages.map((stage) => (
@@ -260,12 +259,14 @@ export function Home() {
               </CarouselItem>
 
               {/* Slide 3: Interview Schedule */}
-              <CarouselItem className="pl-0 space-y-4">
+              <CarouselItem className="pl-0 space-y-6">
                 <CardHeader>
-                  <CardTitle>Interview Schedule</CardTitle>
+                  <CardTitle>Interview schedule</CardTitle>
+                  <CardAction>
+                    <Button size="sm">View Calendar</Button>
+                  </CardAction>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm font-medium text-blue-600 mb-4">{interviewSchedule.length} today</p>
                   <div className="space-y-1">
                     {interviewSchedule.slice(0, 4).map((item, index) => (
                       <div key={index}>
@@ -279,22 +280,18 @@ export function Home() {
                       </div>
                     ))}
                   </div>
-                  <Button variant="secondary" className="w-full mt-4">
-                    View Calendar
-                  </Button>
                 </CardContent>
               </CarouselItem>
 
               {/* Slide 4: Stuck Candidates */}
-              <CarouselItem className="pl-0 space-y-4">
+              <CarouselItem className="pl-0 space-y-6">
                 <CardHeader>
-                  <CardTitle>Stuck Candidates</CardTitle>
+                  <CardTitle>Stuck candidates</CardTitle>
                   <CardAction>
-                    <Info className="size-4 text-muted-foreground" />
+                    <Button size="sm">Triage</Button>
                   </CardAction>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm font-medium text-red-600 mb-4">{stuckCandidates.length} stuck</p>
                   <div className="space-y-1">
                     {stuckCandidates.map((item, index) => (
                       <div key={index}>
@@ -315,19 +312,28 @@ export function Home() {
                       </div>
                     ))}
                   </div>
-                  <Button variant="secondary" className="w-full mt-4">
-                    View All
-                  </Button>
                 </CardContent>
               </CarouselItem>
 
               {/* Slide 5: Feedback Completion */}
-              <CarouselItem className="pl-0 space-y-4">
+              <CarouselItem className="pl-0 space-y-6">
                 <CardHeader>
-                  <CardTitle>Feedback Completion</CardTitle>
+                  <CardTitle>Feedback completion</CardTitle>
+                  <CardAction>
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        openWithFeedbackReminder({
+                          recipients: feedbackItems,
+                          draftMessage: DEFAULT_FEEDBACK_REMINDER_MESSAGE,
+                        })
+                      }
+                    >
+                      Send Reminders
+                    </Button>
+                  </CardAction>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm font-medium text-amber-600 mb-4">{feedbackItems.reduce((a, b) => a + b.overdue, 0)} overdue</p>
                   <div className="space-y-1">
                     {feedbackItems.map((item, index) => (
                       <div key={index}>
@@ -348,28 +354,18 @@ export function Home() {
                       </div>
                     ))}
                   </div>
-                  <Button
-                    variant="secondary"
-                    className="w-full mt-4"
-                    onClick={() =>
-                      openWithFeedbackReminder({
-                        recipients: feedbackItems,
-                        draftMessage: DEFAULT_FEEDBACK_REMINDER_MESSAGE,
-                      })
-                    }
-                  >
-                    Send Reminders
-                  </Button>
                 </CardContent>
               </CarouselItem>
 
               {/* Slide 6: Offer Approval Queue */}
-              <CarouselItem className="pl-0 space-y-4">
+              <CarouselItem className="pl-0 space-y-6">
                 <CardHeader>
-                  <CardTitle>Offer Approval Queue</CardTitle>
+                  <CardTitle>Offer approval queue</CardTitle>
+                  <CardAction>
+                    <Button size="sm">View Offers</Button>
+                  </CardAction>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm font-medium text-amber-600 mb-4">{offerQueue.length} pending</p>
                   <div className="space-y-1">
                     {offerQueue.map((item, index) => (
                       <div key={index}>
@@ -383,16 +379,16 @@ export function Home() {
                       </div>
                     ))}
                   </div>
-                  <Button variant="secondary" className="w-full mt-4">
-                    View Offers
-                  </Button>
                 </CardContent>
               </CarouselItem>
 
               {/* Slide 7: Stage Aging Heatmap */}
-              <CarouselItem className="pl-0 space-y-4">
+              <CarouselItem className="pl-0 space-y-6">
                 <CardHeader>
-                  <CardTitle>Stage Aging Heatmap</CardTitle>
+                  <CardTitle>Stage aging heatmap</CardTitle>
+                  <CardAction>
+                    <Button size="sm">View Details</Button>
+                  </CardAction>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-1">
@@ -417,15 +413,12 @@ export function Home() {
                       </div>
                     ))}
                   </div>
-                  <Button variant="secondary" className="w-full mt-4">
-                    View Details
-                  </Button>
                 </CardContent>
               </CarouselItem>
             </CarouselContent>
 
             {/* Line indicators + arrows */}
-            <div className="flex items-center justify-center gap-3 pb-4">
+            <div className="flex items-center justify-center gap-3 pb-4 mt-auto">
               <Button
                 variant="ghost"
                 size="icon"
@@ -470,7 +463,7 @@ export function Home() {
           {/* App Icons */}
           <Card>
             <CardHeader>
-              <CardTitle>Apps</CardTitle>
+              <CardTitle>SSO login</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-4 gap-3">
@@ -480,9 +473,7 @@ export function Home() {
                     variant="ghost"
                     className="flex flex-col items-center gap-1.5 h-auto py-3"
                   >
-                    <div className={cn("size-10 rounded-lg flex items-center justify-center", app.color)}>
-                      <app.icon className="size-5" />
-                    </div>
+                    <img src={app.image} alt={app.name} className="w-10 h-10 shrink-0 rounded-lg object-cover" />
                     <span className="text-[11px] text-muted-foreground">{app.name}</span>
                   </Button>
                 ))}
@@ -495,17 +486,17 @@ export function Home() {
             {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle>Quick actions</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-1">
                   {quickActions.map((action, index) => (
                     <div key={index}>
                       {index > 0 && <Separator className="my-1" />}
-                      <Button variant="ghost" className="w-full justify-between px-0 h-auto py-2">
+                      <div className="flex items-center justify-between py-2">
                         <span className="text-sm">{action.label}</span>
                         <ArrowRight className="size-4 text-muted-foreground" />
-                      </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -517,9 +508,9 @@ export function Home() {
               <CardHeader>
                 <CardTitle>Approvals</CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col items-center gap-3">
+              <CardContent className="flex flex-col items-center gap-6">
                 <div className="text-4xl font-bold">5</div>
-                <Button variant="outline" size="sm">
+                <Button variant="link" size="sm">
                   View requests
                 </Button>
               </CardContent>
@@ -533,11 +524,7 @@ export function Home() {
         {/* Kudos */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Heart className="size-4 text-pink-500" />
-              Kudos
-            </CardTitle>
-            <CardDescription>Recent peer recognition</CardDescription>
+            <CardTitle>Kudos</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-1">
@@ -563,11 +550,7 @@ export function Home() {
         {/* Out of Office */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palmtree className="size-4 text-emerald-500" />
-              Out of Office Today
-            </CardTitle>
-            <CardDescription>{ptoList.length} team members away</CardDescription>
+            <CardTitle>Out of office today</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-1">
@@ -592,8 +575,7 @@ export function Home() {
         {/* Work Queue */}
         <Card>
           <CardHeader>
-            <CardTitle>Work Queue</CardTitle>
-            <CardDescription>{workQueueItems.length} items need attention</CardDescription>
+            <CardTitle>Work queue</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-1">
@@ -627,6 +609,16 @@ export function Home() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Candidate Profile Panel - Overlay */}
+      {isProfilePanelOpen && selectedCandidate && (
+        <div className="absolute top-0 right-0 bottom-0 w-[450px] overflow-hidden bg-background border-l shadow-2xl transition-all duration-300 ease-in-out z-20">
+          <CandidateProfilePanel
+            candidate={selectedCandidate}
+            onClose={handleProfilePanelClose}
+          />
+        </div>
+      )}
     </div>
   )
 }

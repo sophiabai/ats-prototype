@@ -129,6 +129,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  button, [role="button"] {
+    cursor: pointer;
+  }
   svg {
     stroke-width: 1.5;
   }
