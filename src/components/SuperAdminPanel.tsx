@@ -213,11 +213,11 @@ export function SuperAdminPanel() {
               <button
                 type="button"
                 onClick={() => setView('payroll')}
-                className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border border-l-[3px] border-l-amber-500/80 bg-background hover:bg-muted/50 hover:border-muted-foreground/20 transition-colors text-left"
+                className="w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-lg border border-border border-l-[3px] border-l-amber-500/80 bg-background hover:bg-muted/50 hover:border-muted-foreground/20 transition-colors text-left min-h-[3.5rem]"
               >
-                <span className="flex items-center gap-2.5 min-w-0">
+                <span className="flex items-center gap-2.5 min-w-0 flex-1">
                   <FileCheck className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                  <span className="text-sm font-medium text-foreground truncate">Your payroll run has 3 blockers</span>
+                  <span className="text-sm font-medium text-foreground">Your payroll run has 3 blockers</span>
                 </span>
                 <span className="flex items-center gap-2 shrink-0 text-xs text-muted-foreground">
                   <span>Due Feb 14</span>
@@ -229,11 +229,11 @@ export function SuperAdminPanel() {
               <button
                 type="button"
                 onClick={() => setView('todo')}
-                className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border border-l-[3px] border-l-primary/60 bg-background hover:bg-muted/50 hover:border-muted-foreground/20 transition-colors text-left"
+                className="w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-lg border border-border border-l-[3px] border-l-primary/60 bg-background hover:bg-muted/50 hover:border-muted-foreground/20 transition-colors text-left min-h-[3.5rem]"
               >
-                <span className="flex items-center gap-2.5 min-w-0">
+                <span className="flex items-center gap-2.5 min-w-0 flex-1">
                   <ListTodo className="h-4 w-4 text-primary shrink-0" />
-                  <span className="text-sm font-medium text-foreground truncate">4 items on your to-do list need attention</span>
+                  <span className="text-sm font-medium text-foreground">4 items on your to-do list need attention</span>
                 </span>
                 <span className="flex items-center gap-2 shrink-0 text-xs text-muted-foreground">
                   <span>Overdue</span>
