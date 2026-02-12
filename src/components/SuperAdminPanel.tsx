@@ -69,7 +69,7 @@ export function SuperAdminPanel() {
   const [view, setView] = useState<PanelView>('home')
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [, setError] = useState<string | null>(null)
   const [reminderMessage, setReminderMessage] = useState('')
   const isSuperAdmin = persona === 'super_admin'
   const isPayrollWeek = mode === 'payroll_week'
