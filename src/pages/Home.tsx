@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Plus,
   Briefcase,
+  ChevronLeft,
   ChevronRight,
   ClipboardCheck,
   Calendar,
@@ -40,6 +41,8 @@ import {
 } from "@/components/ui/carousel"
 import { candidates } from "@/data/candidates"
 import { WidgetLibraryModal } from "@/components/WidgetLibraryModal"
+import { useChatbotPanel } from "@/components/ChatbotPanel"
+import { DEFAULT_FEEDBACK_REMINDER_MESSAGE } from "@/components/SuperAdminPanel"
 
 
 const pipelineStages = [
@@ -125,6 +128,7 @@ const ptoList = [
 
 
 export function Home() {
+  const { openWithFeedbackReminder } = useChatbotPanel()
   const [widgetLibraryOpen, setWidgetLibraryOpen] = useState(false)
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -344,7 +348,16 @@ export function Home() {
                       </div>
                     ))}
                   </div>
-                  <Button variant="secondary" className="w-full mt-4">
+                  <Button
+                    variant="secondary"
+                    className="w-full mt-4"
+                    onClick={() =>
+                      openWithFeedbackReminder({
+                        recipients: feedbackItems,
+                        draftMessage: DEFAULT_FEEDBACK_REMINDER_MESSAGE,
+                      })
+                    }
+                  >
                     Send Reminders
                   </Button>
                 </CardContent>
@@ -411,20 +424,43 @@ export function Home() {
               </CarouselItem>
             </CarouselContent>
 
-            {/* Line indicators */}
-            <div className="flex justify-center gap-1.5 pb-4">
-              {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <button
-                  key={i}
-                  onClick={() => carouselApi?.scrollTo(i)}
-                  className={cn(
-                    "h-1 rounded-full transition-all",
-                    currentSlide === i
-                      ? "w-6 bg-primary"
-                      : "w-4 bg-muted-foreground/25"
-                  )}
-                />
-              ))}
+            {/* Line indicators + arrows */}
+            <div className="flex items-center justify-center gap-3 pb-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0 rounded-full text-muted-foreground hover:bg-muted hover:text-muted-foreground disabled:opacity-40 disabled:hover:text-muted-foreground"
+                onClick={() => carouselApi?.scrollPrev()}
+                disabled={currentSlide === 0}
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="size-5" />
+              </Button>
+              <div className="flex gap-1.5">
+                {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                  <button
+                    key={i}
+                    onClick={() => carouselApi?.scrollTo(i)}
+                    className={cn(
+                      "h-1 rounded-full transition-all",
+                      currentSlide === i
+                        ? "w-6 bg-primary"
+                        : "w-4 bg-muted-foreground/25 hover:bg-muted-foreground/40"
+                    )}
+                    aria-label={`Go to slide ${i + 1}`}
+                  />
+                ))}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0 rounded-full text-muted-foreground hover:bg-muted hover:text-muted-foreground disabled:opacity-40 disabled:hover:text-muted-foreground"
+                onClick={() => carouselApi?.scrollNext()}
+                disabled={currentSlide === 7}
+                aria-label="Next slide"
+              >
+                <ChevronRight className="size-5" />
+              </Button>
             </div>
           </Carousel>
         </Card>

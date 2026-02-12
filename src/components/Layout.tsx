@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { SiteNav } from './SiteNav'
-import { ChatbotPanelProvider, ChatbotPanel } from './ChatbotPanel'
+import { ChatbotPanel } from './ChatbotPanel'
 import { WorkflowModalProvider } from '@/lib/workflowModalContext'
 import { WorkflowModal } from './WorkflowModal'
 import { CandidatePoolsProvider, useCandidatePools } from '@/lib/candidatePoolsContext'
@@ -232,33 +232,31 @@ export function Layout() {
   return (
     <CandidatePoolsProvider>
       <MessagedCandidatesProvider>
-      <ChatbotPanelProvider>
         <WorkflowModalProvider>
           <div className="h-screen flex flex-col w-full overflow-hidden">
             <SiteNav />
-          <SidebarProvider>
-            <div className="flex flex-1 overflow-hidden">
-              <Sidebar>
-                <SidebarNav />
-              </Sidebar>
-
+            <SidebarProvider>
               <div className="flex flex-1 overflow-hidden">
-                <SidebarInset className="flex-1 flex flex-col overflow-hidden bg-transparent">
-                  <main className="flex-1 overflow-auto">
-                    <div className="h-full p-4 sm:p-6">
-                      <Outlet />
-                    </div>
-                  </main>
-                </SidebarInset>
+                <Sidebar>
+                  <SidebarNav />
+                </Sidebar>
 
-                <ChatbotPanel />
+                <div className="flex flex-1 overflow-hidden">
+                  <SidebarInset className="flex-1 flex flex-col overflow-hidden bg-transparent">
+                    <main className="flex-1 overflow-auto">
+                      <div className="h-full p-4 sm:p-6">
+                        <Outlet />
+                      </div>
+                    </main>
+                  </SidebarInset>
+
+                  <ChatbotPanel />
+                </div>
               </div>
-            </div>
-          </SidebarProvider>
+            </SidebarProvider>
           </div>
           <WorkflowModal />
         </WorkflowModalProvider>
-      </ChatbotPanelProvider>
       </MessagedCandidatesProvider>
     </CandidatePoolsProvider>
   )

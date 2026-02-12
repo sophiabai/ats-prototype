@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
   Sparkles,
   FileCheck,
@@ -10,6 +10,7 @@ import {
   MessageSquarePlus,
   ThumbsUp,
   ThumbsDown,
+  Send,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,10 +18,13 @@ import { SearchInput } from '@/components/ui/search-input'
 import { Message, MessageContent } from '@/components/ui/message'
 import { Markdown } from '@/components/ui/markdown'
 import { Loader } from '@/components/ui/loader'
+import { Textarea } from '@/components/ui/textarea'
 import { usePersonaMode } from '@/lib/personaModeContext'
 import { useWorkflowModal } from '@/lib/workflowModalContext'
+import { useChatbotPanel } from '@/components/ChatbotPanel'
 import { useNavigate } from 'react-router'
 import { chat } from '@/lib/api'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 type PanelView = 'home' | 'payroll' | 'todo'
@@ -51,16 +55,30 @@ const PILL_DISPLAY_QUESTIONS: Record<string, string> = {
   'Business summary': "Give me a brief business summary of key metrics and what I should focus on today.",
 }
 
+export const DEFAULT_FEEDBACK_REMINDER_MESSAGE = `Hi,
+
+This is a friendly reminder to submit your overdue interview feedback. Please complete it at your earliest convenience so we can keep our hiring process on track.
+
+Thank you!`
+
 export function SuperAdminPanel() {
   const { persona, mode } = usePersonaMode()
   const { open: openModal, workQueueItems } = useWorkflowModal()
+  const { feedbackReminderDraft, clearFeedbackReminderDraft } = useChatbotPanel()
   const navigate = useNavigate()
   const [view, setView] = useState<PanelView>('home')
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [, setError] = useState<string | null>(null)
+  const [reminderMessage, setReminderMessage] = useState('')
   const isSuperAdmin = persona === 'super_admin'
   const isPayrollWeek = mode === 'payroll_week'
+
+  useEffect(() => {
+    if (feedbackReminderDraft) {
+      setReminderMessage(feedbackReminderDraft.draftMessage)
+    }
+  }, [feedbackReminderDraft])
 
   const handlePillClick = useCallback(async (label: string) => {
     const userPrompt = PILL_PROMPTS[label] ?? label
@@ -111,6 +129,56 @@ export function SuperAdminPanel() {
   }
 
   const unresolvedQueue = workQueueItems.filter((i) => !i.resolved)
+
+  // Feedback reminder draft: opened from Home "Send Reminders" on Feedback Completion widget
+  if (feedbackReminderDraft && isSuperAdmin) {
+    const handleSubmitFeedbackReminders = () => {
+      toast.success(`Reminders sent to ${feedbackReminderDraft.recipients.length} recipient${feedbackReminderDraft.recipients.length === 1 ? '' : 's'}.`)
+      clearFeedbackReminderDraft()
+    }
+    return (
+      <div className="flex flex-col h-full bg-gradient-to-b from-background to-muted/20 rounded-xl overflow-hidden">
+        <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 -ml-1 mb-2 self-start text-muted-foreground hover:text-foreground"
+            onClick={clearFeedbackReminderDraft}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <h3 className="text-sm font-semibold text-foreground mb-1">Send feedback reminders</h3>
+          <p className="text-xs text-muted-foreground mb-4">Review the message below and send when ready.</p>
+          <div className="space-y-2 mb-4">
+            <p className="text-xs font-medium text-muted-foreground">Recipients</p>
+            <ul className="rounded-lg border border-border divide-y divide-border bg-muted/20">
+              {feedbackReminderDraft.recipients.map((r, i) => (
+                <li key={i} className="px-3 py-2 flex items-center justify-between text-sm">
+                  <span className="font-medium text-foreground">{r.name}</span>
+                  <span className="text-xs text-muted-foreground">{r.overdue} overdue</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="space-y-2 mb-4">
+            <p className="text-xs font-medium text-muted-foreground">Message</p>
+            <Textarea
+              value={reminderMessage}
+              onChange={(e) => setReminderMessage(e.target.value)}
+              placeholder="Write your reminder..."
+              className="min-h-[120px] resize-none text-sm"
+              disabled={!feedbackReminderDraft}
+            />
+          </div>
+          <Button className="w-full gap-2" onClick={handleSubmitFeedbackReminders}>
+            <Send className="h-4 w-4" />
+            Send reminders
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   const footer = (
     <>
@@ -196,7 +264,7 @@ export function SuperAdminPanel() {
               variant="outline"
               size="sm"
               className="gap-1.5 text-muted-foreground hover:text-foreground text-xs border-border/80"
-              onClick={() => {}}
+              onClick={startNewChat}
             >
               <MessageSquarePlus className="h-3.5 w-3.5" />
               New chat
