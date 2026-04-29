@@ -31,6 +31,19 @@ export function SearchInput({
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
   const currentValue = value !== undefined ? value : internalValue
+
+  const adjustHeight = React.useCallback(() => {
+    const textarea = textareaRef.current
+    if (textarea) {
+      textarea.style.height = 'auto'
+      textarea.style.height = `${textarea.scrollHeight}px`
+    }
+  }, [])
+
+  React.useEffect(() => {
+    adjustHeight()
+  }, [currentValue, adjustHeight])
+
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value
     if (value === undefined) {
@@ -61,8 +74,7 @@ export function SearchInput({
         onKeyDown={handleKeyDown}
         disabled={disabled}
         className={cn(
-          "resize-none border-0 focus-visible:ring-0 pl-4 pr-12 pb-2 text-base text-left",
-          minHeight && `min-h-[${minHeight}]`
+          "resize-none border-0 focus-visible:ring-0 pl-4 pr-12 pb-2 text-base text-left overflow-hidden"
         )}
         style={{ minHeight }}
       />
