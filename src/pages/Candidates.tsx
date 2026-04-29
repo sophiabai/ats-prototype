@@ -80,7 +80,7 @@ export function Candidates() {
               value={searchQuery}
               onChange={setSearchQuery}
               onSubmit={handleSearch}
-              className="w-lg"
+              className="w-2xl"
               />
 
           {/* Start from CSV */}
@@ -93,28 +93,30 @@ export function Candidates() {
 
       {/* Candidate Pools Cards */}
       <div className="flex justify-center mt-12">
-        <div className="w-full max-w-4xl">
+        <div className="w-2xl">
           <h2 className="text-sm font-medium text-muted-foreground mb-4">Candidate pool</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Card
-              className="cursor-pointer hover:shadow-md transition-shadow py-3 gap-3"
+              className="cursor-pointer hover:shadow-md transition-shadow py-3 gap-3 flex flex-col justify-between"
               onClick={() => navigate('/candidates/all')}
             >
               <CardHeader className="px-4 gap-1.5">
-                <CardTitle className="text-base leading-tight line-clamp-2 min-h-[2lh]">
-                  All candidates
-                </CardTitle>
+                <CardTitle className="text-sm font-normal leading-tight">All candidates</CardTitle>
+              </CardHeader>
+              <CardHeader className="px-4 pt-0">
                 <CardDescription>{candidates.length.toLocaleString()} records</CardDescription>
               </CardHeader>
             </Card>
             {pools.map((pool) => (
               <Card 
                 key={pool.id}
-                className="cursor-pointer hover:shadow-md transition-shadow py-3 gap-3"
+                className="cursor-pointer hover:shadow-md transition-shadow py-3 gap-3 flex flex-col justify-between"
                 onClick={() => handlePoolClick(pool.id, pool.query)}
               >
                 <CardHeader className="px-4 gap-1.5">
-                  <CardTitle className="text-sm leading-tight line-clamp-2 min-h-[2lh]">{pool.title}</CardTitle>
+                  <CardTitle className="text-sm font-normal leading-tight">{pool.title}</CardTitle>
+                </CardHeader>
+                <CardHeader className="px-4 pt-0">
                   <CardDescription>{pool.resultCount.toLocaleString()} records</CardDescription>
                 </CardHeader>
               </Card>
