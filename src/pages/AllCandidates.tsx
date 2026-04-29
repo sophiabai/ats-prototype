@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MoreVertical, Mail, Filter, Maximize2, Search, ChevronDown } from 'lucide-react'
+import { MoreVertical, Mail, Filter, Search, ChevronDown } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -87,9 +87,6 @@ export function AllCandidates() {
             <div className="flex items-center gap-2 ml-auto flex-shrink-0">
               <Button variant="ghost" size="icon">
                 <Filter className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Maximize2 className="h-4 w-4" />
               </Button>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />

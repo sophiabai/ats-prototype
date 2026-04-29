@@ -45,6 +45,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 const mainNavItems = [
   { title: 'Overview', icon: LayoutDashboard, url: '/' },
@@ -138,16 +139,21 @@ function SidebarNav() {
                                 
                                 return (
                                   <SidebarMenuSubItem key={pool.id} className="group/pool-item relative">
-                                    <SidebarMenuSubButton 
-                                      isActive={isActive}
-                                      onClick={() => navigate(`/candidates/search?q=${encodeURIComponent(pool.query)}&poolId=${pool.id}`)}
-                                      className="group-hover/pool-item:pr-8"
-                                    >
-                                      <span className="truncate">{pool.title}</span>
-                                      {poolsWithBadge.has(pool.id) && (
-                                        <Badge variant="default" className="text-[10px] px-1 py-0.5 h-4 shrink-0 group-hover/pool-item:hidden">10 new</Badge>
-                                      )}
-                                    </SidebarMenuSubButton>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <SidebarMenuSubButton 
+                                          isActive={isActive}
+                                          onClick={() => navigate(`/candidates/search?q=${encodeURIComponent(pool.query)}&poolId=${pool.id}`)}
+                                          className="group-hover/pool-item:pr-8"
+                                        >
+                                          <span className="truncate">{pool.title}</span>
+                                          {poolsWithBadge.has(pool.id) && (
+                                            <Badge variant="default" className="text-[10px] px-1 py-0.5 h-4 shrink-0 group-hover/pool-item:hidden">+10</Badge>
+                                          )}
+                                        </SidebarMenuSubButton>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="right">{pool.title}</TooltipContent>
+                                    </Tooltip>
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
                                         <button className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded-md opacity-0 group-hover/pool-item:opacity-100 hover:bg-sidebar-accent data-[state=open]:opacity-100">

@@ -114,7 +114,7 @@ export function Candidates() {
                 onClick={() => handlePoolClick(pool.id, pool.query)}
               >
                 <CardHeader className="px-4 gap-1.5">
-                  <CardTitle className="text-base leading-tight line-clamp-2 min-h-[2lh]">{pool.title}</CardTitle>
+                  <CardTitle className="text-sm leading-tight line-clamp-2 min-h-[2lh]">{pool.title}</CardTitle>
                   <CardDescription>{pool.resultCount.toLocaleString()} records</CardDescription>
                 </CardHeader>
               </Card>

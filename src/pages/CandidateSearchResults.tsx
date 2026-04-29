@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router'
-import { ArrowLeft, MoreVertical, Mail, ArrowRight, Filter, Maximize2, Search, ChevronDown, Plus, AtSign, Users, ArrowLeftToLine, ArrowRightFromLine, Send, ListOrdered, Clock } from 'lucide-react'
+import { ArrowLeft, MoreVertical, Mail, ArrowRight, Filter, Search, ChevronDown, Plus, AtSign, Users, ArrowLeftToLine, ArrowRightFromLine, Send, ListOrdered, Clock } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -42,6 +42,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { searchCandidates } from '@/lib/candidateSearch'
 import type { CandidateEvaluation, SearchCriterion } from '@/lib/candidateSearch'
 import { useCandidatePools } from '@/lib/candidatePoolsContext'
@@ -529,9 +530,6 @@ export function CandidateSearchResults() {
                 <Button variant="ghost" size="icon">
                   <Filter className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon">
-                  <Maximize2 className="h-4 w-4" />
-                </Button>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input 
@@ -634,11 +632,16 @@ export function CandidateSearchResults() {
                                 {getInitials(candidate.name)}
                               </AvatarFallback>
                             </Avatar>
-                            <div>
+                            <div className="min-w-0">
                               <div className="text-sm font-medium">{candidate.name}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {candidate.currentRole}
-                              </div>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="text-xs text-muted-foreground truncate max-w-[180px]">
+                                    {candidate.currentRole}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom">{candidate.currentRole}</TooltipContent>
+                              </Tooltip>
                             </div>
                           </div>
                         </TableCell>
@@ -770,35 +773,15 @@ export function CandidateSearchResults() {
             {selectedTemplateData && (
               <>
                 <div>
-                  {/* Stage timeline navigation */}
-                  <div className="flex items-center mb-4">
-                    {selectedTemplateData.stages.map((stage, idx) => (
-                      <div key={idx} className="flex items-center flex-1 last:flex-none">
-                        <button
-                          onClick={() => setActiveStage(idx)}
-                          className="flex items-center gap-2 cursor-pointer group"
-                        >
-                          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${
-                            idx === activeStage
-                              ? 'bg-primary text-primary-foreground ring-2 ring-primary/20'
-                              : idx < activeStage
-                              ? 'bg-primary text-primary-foreground'
-                              : 'bg-muted text-muted-foreground group-hover:bg-muted-foreground/20'
-                          }`}>
-                            {idx + 1}
-                          </div>
-                          <span className={`text-xs whitespace-nowrap ${
-                            idx === activeStage ? 'text-foreground font-medium' : 'text-muted-foreground'
-                          }`}>{stage.delay}</span>
-                        </button>
-                        {idx < selectedTemplateData.stages.length - 1 && (
-                          <div className={`flex-1 h-px mx-3 ${
-                            idx < activeStage ? 'bg-primary' : 'bg-border'
-                          }`} />
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                  <Tabs value={String(activeStage)} onValueChange={(val) => setActiveStage(Number(val))} className="mb-4">
+                    <TabsList className="w-full">
+                      {selectedTemplateData.stages.map((stage, idx) => (
+                        <TabsTrigger key={idx} value={String(idx)} className="flex-1">
+                          {stage.delay}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
 
                   {/* Email preview */}
                   <div className="border rounded-lg overflow-hidden">
